@@ -1,0 +1,23 @@
+# If you want Gerenciador de Chaves Segura to appear in a Linux app launcher ("start menu"), install this by doing:
+# sudo desktop-file-install Gerenciador de Chaves Segura.desktop
+# Note: This assumes $HOME/.local/bin is in your $PATH
+
+[Desktop Entry]
+Comment=Lightweight Bitcoin Client
+Exec=Gerenciador de Chaves Segura %u
+GenericName[en_US]=Bitcoin Wallet
+GenericName=Bitcoin Wallet
+Icon=Gerenciador de Chaves Segura
+Name[en_US]=Gerenciador de Chaves Segura Bitcoin Wallet
+Name=Gerenciador de Chaves Segura Bitcoin Wallet
+Categories=Finance;Network;
+StartupNotify=true
+StartupWMClass=Gerenciador de Chaves Segura
+Terminal=false
+Type=Application
+MimeType=x-scheme-handler/bitcoin;x-scheme-handler/lightning;
+Actions=Testnet;
+
+[Desktop Action Testnet]
+Exec=Gerenciador de Chaves Segura --testnet %u
+Name=Testnet mode

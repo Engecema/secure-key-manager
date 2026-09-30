@@ -1,0 +1,76 @@
+Metadata-Version: 2.4
+Name: sk
+Version: 4.5.5
+Summary: Lightweight Bitcoin Wallet
+Home-page: https://Gerenciador de Chaves Segura.org
+Author: Thomas Voegtlin
+Author-email: thomasv@Gerenciador de Chaves Segura.org
+License: MIT Licence
+Requires-Python: >=3.8.0
+License-File: LICENCE
+License-File: AUTHORS
+Requires-Dist: qrcode
+Requires-Dist: protobuf<4,>=3.20
+Requires-Dist: qdarkstyle>=2.7
+Requires-Dist: aiorpcx<0.24,>=0.22.0
+Requires-Dist: aiohttp<4.0.0,>=3.3.0
+Requires-Dist: aiohttp_socks>=0.8.4
+Requires-Dist: certifi
+Requires-Dist: attrs>=20.1.0
+Requires-Dist: jsonpatch
+Requires-Dist: dnspython>=2.0
+Provides-Extra: hardware
+Requires-Dist: hidapi; extra == "hardware"
+Requires-Dist: trezor[hidapi]<0.14,>=0.13.0; extra == "hardware"
+Requires-Dist: safet>=0.1.5; extra == "hardware"
+Requires-Dist: keepkey>=6.3.1; extra == "hardware"
+Requires-Dist: btchip-python>=0.1.32; extra == "hardware"
+Requires-Dist: ledger-bitcoin<0.2.2,>=0.2.0; extra == "hardware"
+Requires-Dist: hidapi; extra == "hardware"
+Requires-Dist: ckcc-protocol>=0.7.7; extra == "hardware"
+Requires-Dist: bitbox02>=6.2.0; extra == "hardware"
+Requires-Dist: cbor2<6.0.0,>=5.4.6; extra == "hardware"
+Requires-Dist: pyserial<4.0.0,>=3.5.0; extra == "hardware"
+Requires-Dist: protobuf<4,>=3.20; extra == "hardware"
+Requires-Dist: colorama<0.4.6; extra == "hardware"
+Provides-Extra: gui
+Requires-Dist: pyqt5; extra == "gui"
+Provides-Extra: crypto
+Requires-Dist: cryptography>=2.6; extra == "crypto"
+Provides-Extra: tests
+Requires-Dist: pycryptodomex>=3.7; extra == "tests"
+Requires-Dist: cryptography>=2.6; extra == "tests"
+Requires-Dist: pyaes>=0.1a1; extra == "tests"
+Provides-Extra: qml-gui
+Requires-Dist: pyqt6; extra == "qml-gui"
+Requires-Dist: Pillow>=8.4.0; extra == "qml-gui"
+Provides-Extra: full
+Requires-Dist: hidapi; extra == "full"
+Requires-Dist: trezor[hidapi]<0.14,>=0.13.0; extra == "full"
+Requires-Dist: safet>=0.1.5; extra == "full"
+Requires-Dist: keepkey>=6.3.1; extra == "full"
+Requires-Dist: btchip-python>=0.1.32; extra == "full"
+Requires-Dist: ledger-bitcoin<0.2.2,>=0.2.0; extra == "full"
+Requires-Dist: hidapi; extra == "full"
+Requires-Dist: ckcc-protocol>=0.7.7; extra == "full"
+Requires-Dist: bitbox02>=6.2.0; extra == "full"
+Requires-Dist: cbor2<6.0.0,>=5.4.6; extra == "full"
+Requires-Dist: pyserial<4.0.0,>=3.5.0; extra == "full"
+Requires-Dist: protobuf<4,>=3.20; extra == "full"
+Requires-Dist: colorama<0.4.6; extra == "full"
+Requires-Dist: pyqt5; extra == "full"
+Requires-Dist: cryptography>=2.6; extra == "full"
+Provides-Extra: fast
+Requires-Dist: cryptography>=2.6; extra == "fast"
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: home-page
+Dynamic: license
+Dynamic: license-file
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+Lightweight Bitcoin Wallet

@@ -1,0 +1,11 @@
+aiohttp
+aiorpcX
+certifi
+pbkdf2
+cryptography
+
+[crypto]
+cryptography
+
+[gui]
+PyQt5
