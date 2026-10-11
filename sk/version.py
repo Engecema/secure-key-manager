@@ -1,2 +1,0 @@
-sk_VERSION = '4.5.5'
-APK_VERSION = '4.5.5'
