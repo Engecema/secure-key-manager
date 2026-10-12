@@ -1,8 +1,6 @@
 {
-  "name": "Gerenciador de Chaves Segura (Secure Key Manager)",
-  "description": "Secure Bitcoin and Lightning Network Key Manager and lightweight wallet client with multi-keystore management, BIP39 seed generation, SegWit UTXO tracking, and transaction signing.",
-  "permissions": [],
-  "capabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "name": "BitX Core | Portal & Carteira BTXC",
+  "description": "Plataforma oficial da rede BitX Core (BTXC) com portal institucional, carteira experimental e autenticação integrada.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

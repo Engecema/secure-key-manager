@@ -1,99 +1,169 @@
-import React, { useState } from 'react';
-import { WalletProvider, useWallet } from './context/WalletContext';
-import { Header } from './components/Header';
-import { Navigation, TabId } from './components/Navigation';
-import { HistoryTab } from './components/HistoryTab';
-import { SendTab } from './components/SendTab';
-import { ReceiveTab } from './components/ReceiveTab';
-import { AddressesTab } from './components/AddressesTab';
-import { KeystoreTab } from './components/KeystoreTab';
-import { LightningTab } from './components/LightningTab';
-import { NetworkTab } from './components/NetworkTab';
-import { TxDetailsModal } from './components/TxDetailsModal';
-import { NewWalletModal } from './components/NewWalletModal';
-import { TransactionItem } from './types';
-import { Shield, Lock, Radio } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Navbar } from './components/Navbar';
+import { LandingHero } from './components/LandingHero';
+import { WalletView } from './components/WalletView';
+import { NodeDashboard } from './components/NodeDashboard';
+import { SupabaseRenderPanel } from './components/SupabaseRenderPanel';
+import { AuthModal } from './components/AuthModal';
+import { LegalModal } from './components/LegalModal';
+import { getSupabaseClient, isSupabaseConfigured } from './lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
-const MainLayout: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<TabId>('history');
-  const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
-  const [showNewWalletModal, setShowNewWalletModal] = useState(false);
+export default function App() {
+  const [activeTab, setActiveTab] = useState<'inicio' | 'carteira' | 'painel' | 'integracoes'>('inicio');
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [legalModalType, setLegalModalType] = useState<'privacidade' | 'termos' | 'cookies' | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const { isLocked, toggleLock, activeServer, network } = useWallet();
+  // Supabase Auth listener
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      setUser(null);
+      return;
+    }
+
+    // Get current session
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+    }).catch(err => {
+      console.warn('Erro ao obter sessão Supabase:', err);
+    });
+
+    // Listen to changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [refreshTrigger]);
+
+  const handleSignOut = async () => {
+    const supabase = getSupabaseClient();
+    if (supabase) {
+      await supabase.auth.signOut();
+      setUser(null);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-amber-500 selection:text-slate-950">
-      {/* Header */}
-      <Header onOpenNewWallet={() => setShowNewWalletModal(true)} />
+    <div className="min-h-screen bg-[#f4f3ed] text-[#172522] selection:bg-[#b9ef6b] selection:text-[#172522]">
+      {/* Top Navigation */}
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        user={user}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onSignOut={handleSignOut}
+      />
 
-      {/* Navigation Tabs */}
-      <Navigation currentTab={currentTab} onSelectTab={setCurrentTab} />
+      {/* Main Content Body */}
+      <main className="min-h-[calc(100vh-220px)]">
+        {activeTab === 'inicio' && (
+          <LandingHero
+            onOpenWallet={() => setActiveTab('carteira')}
+            onOpenNode={() => setActiveTab('painel')}
+          />
+        )}
 
-      {/* Main Tab Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {isLocked ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center max-w-md mx-auto my-12 space-y-4 shadow-xl">
-            <div className="w-14 h-14 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-2xl flex items-center justify-center mx-auto">
-              <Lock className="w-7 h-7" />
-            </div>
-            <h2 className="text-lg font-bold text-slate-100">Carteira Bloqueada</h2>
-            <p className="text-xs text-slate-400">
-              O cofre de chaves privadas está temporariamente bloqueado para segurança. Clique abaixo para desbloquear o acesso.
-            </p>
-            <button
-              onClick={toggleLock}
-              className="py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors cursor-pointer shadow-md shadow-amber-500/20"
-            >
-              Desbloquear Carteira
-            </button>
-          </div>
-        ) : (
-          <>
-            {currentTab === 'history' && <HistoryTab onSelectTx={setSelectedTx} />}
-            {currentTab === 'send' && <SendTab />}
-            {currentTab === 'receive' && <ReceiveTab />}
-            {currentTab === 'addresses' && <AddressesTab />}
-            {currentTab === 'keystore' && <KeystoreTab />}
-            {currentTab === 'lightning' && <LightningTab />}
-            {currentTab === 'network' && <NetworkTab />}
-          </>
+        {activeTab === 'carteira' && (
+          <WalletView
+            user={user}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onOpenConfig={() => setActiveTab('integracoes')}
+          />
+        )}
+
+        {activeTab === 'painel' && <NodeDashboard />}
+
+        {activeTab === 'integracoes' && (
+          <SupabaseRenderPanel
+            onCredentialsUpdated={() => setRefreshTrigger((t) => t + 1)}
+          />
         )}
       </main>
 
-      {/* Bottom Footer Status Bar (Classic Electrum style) */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-2.5 px-4 text-xs text-slate-400 flex flex-wrap justify-between items-center gap-2">
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-1.5 font-mono text-[11px] text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span>SPV Sincronizado</span>
-            <span className="text-slate-500">&bull; Bloco #{activeServer.height}</span>
-          </div>
-          <span className="text-slate-700">|</span>
-          <span className="text-[11px] text-slate-500 font-mono">
-            Servidor: {activeServer.host}:{activeServer.port}
-          </span>
-        </div>
+      {/* Footer */}
+      <footer className="border-t border-[#d5d9ce] bg-[#e8ebe2]/70 py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#172522] text-xs font-bold text-[#b9ef6b]">
+                  SKM
+                </div>
+                <strong className="text-sm font-extrabold text-[#172522]">Secure Key Manager</strong>
+              </div>
+              <p className="mt-2 text-xs text-[#586761] leading-relaxed">
+                Plataforma corporativa para custódia segura, cofre criptográfico e gestão de chaves privadas e credenciais com Supabase.
+              </p>
+              <div className="mt-3">
+                <a
+                  href="https://github.com/Engecema/bitx-core"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#204336] hover:underline"
+                >
+                  Repositório Oficial no GitHub ➔
+                </a>
+              </div>
+            </div>
 
-        <div className="flex items-center space-x-4 text-[11px] text-slate-500">
-          <span>Gerenciador de Chaves Segura (Electrum Client)</span>
-          <span className="text-slate-700">&bull;</span>
-          <span>BIP39 / BIP84 / Lightning Network</span>
+            <address className="not-italic text-xs text-[#586761] space-y-1">
+              <strong className="block text-sm text-[#172522]">Engecema Engenharia Fomento e Tecnologia Ltda</strong>
+              <div>CNPJ: 05.368.602/0002-09</div>
+              <div>Rua José de Moraes Rego, 1299, Sala A, Centro</div>
+              <div>Campinas do Piauí - PI, CEP 64730-000</div>
+              <div className="text-[11px] text-[#586761] pt-1">Hospedagem Oficial: <strong>bitx-core.onrender.com</strong></div>
+            </address>
+
+            <div className="space-y-2 text-xs">
+              <strong className="block text-sm text-[#172522]">Termos e Governança</strong>
+              <div className="flex flex-col space-y-1.5 text-[#586761]">
+                <button
+                  onClick={() => setLegalModalType('privacidade')}
+                  className="text-left hover:text-[#172522] hover:underline"
+                >
+                  Política de Privacidade (LGPD)
+                </button>
+                <button
+                  onClick={() => setLegalModalType('termos')}
+                  className="text-left hover:text-[#172522] hover:underline"
+                >
+                  Termos de Uso do Ecossistema
+                </button>
+                <button
+                  onClick={() => setLegalModalType('cookies')}
+                  className="text-left hover:text-[#172522] hover:underline"
+                >
+                  Política de Cookies e Cofre Local
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-[#d5d9ce] pt-4 text-center text-[11px] text-[#586761]">
+            © {new Date().getFullYear()} BitX Core / Engecema Tecnologia. Desenvolvido para testes e governança da rede BTXC.
+          </div>
         </div>
       </footer>
 
-      {/* Modals */}
-      <TxDetailsModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
-      <NewWalletModal isOpen={showNewWalletModal} onClose={() => setShowNewWalletModal(false)} />
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => setRefreshTrigger((t) => t + 1)}
+        onOpenConfig={() => setActiveTab('integracoes')}
+      />
+
+      {/* Legal Information Modal */}
+      <LegalModal
+        type={legalModalType}
+        onClose={() => setLegalModalType(null)}
+      />
     </div>
   );
-};
-
-export const App: React.FC = () => {
-  return (
-    <WalletProvider>
-      <MainLayout />
-    </WalletProvider>
-  );
-};
-
-export default App;
+}
